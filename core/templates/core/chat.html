@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+{% if not usersession and not messages %}
+
+<!-- Start Chat Section -->
+<div class="nk-block-head nk-block-head-sm">
+    <div class="nk-block-between align-center">
+        <div class="nk-block-head-content">
+            <h3 class="nk-block-title page-title">Ailixir AI Assistant</h3>
+            <p class="text-soft">Your intelligent and operational assistant.</p>
+        </div>
+
+    </div>
+</div>
+
+<div class="card card-bordered shadow-sm">
+    <form method="post" class="card-inner text-center py-5">
+        {% csrf_token %}
+        <em class="icon ni ni-cpu" style="font-size:45px;"></em>
+        <h4 class="mt-2">Start a Conversation</h4>
+        <p class="text-soft">Ask questions about products, research, operations, and more.</p>
+        <div class="form-control-wrap">
+          <input class="form-control" name="username" type="text" placeholder="Enter your name">
+        </div>
+        <button class="btn btn-primary btn-lg mt-3">
+            <em class="icon ni ni-message"></em> Begin Chat
+        </button>
+    </form>
+</div>
+
+{% else %}
+
+<style>
+    /* Wrapper to force full page chat responsiveness */
+    .chat-wrapper {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 110px);
+        border-radius: 8px;
+    }
+
+    /* Chat messages area */
+    .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 15px;
+        scroll-behavior: smooth;
+    }
+
+    /* Bubble styling */
+    .bubble-user, .bubble-ai {
+        max-width: 85%;
+        padding: 12px 16px;
+        margin-bottom: 12px;
+        border-radius: 12px;
+        line-height: 1.5;
+        word-break: break-word;
+    }
+
+    .bubble-user {
+        background: #d6e4ff;
+        margin-left: auto;
+        border-bottom-right-radius: 4px;
+    }
+
+    .bubble-ai {
+        background: #ffffff;
+        border: 1px solid #e5e9f2;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+    }
+
+    .bubble-meta {
+        font-size: 11px;
+        color: #8e9aab;
+        margin-top: 4px;
+    }
+
+    /* Input Bar */
+    .chat-input {
+        background: #ffffff;
+        border-top: 1px solid #e5e9f2;
+        padding: 10px;
+    }
+
+    .chat-input textarea {
+        width: 100%;
+        resize: none;
+        border-radius: 8px;
+        padding: 10px;
+        height: 60px;
+    }
+
+    @media (max-width: 768px) {
+        .chat-wrapper {
+            height: calc(100vh - 85px);
+        }
+        .chat-input textarea {
+            height: 55px;
+        }
+    }
+</style>
+
+
+<!-- RESPONSIVE CHAT STRUCTURE -->
+<div class="chat-wrapper">
+
+    <!-- MESSAGES AREA -->
+    <div id="chat-box"
+         class="chat-messages">
+      {% if not messages %}
+      <h3>Quick Prompts</h3>
+      <div class="">
+        {% for qp in quick_prompts %}
+        <a href="/quick_prompts/{{ qp.id }}/">
+          <div class="card m-1 mx-0">
+            <div class="card-body">
+              <span class="d-flex justify-content-between align-items-center">{{ qp.title }} <em class="icon ni ni-arrow-right"></em></span>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+        <span class="h4">{{ qp.title }}</span>
+        {% include 'core/_messages.html' with messages=messages %}
+      {% endif %}
+    </div>
+
+    <!-- INPUT BAR -->
+    <form 
+        id="chat-form"
+        class="chat-input"
+        hx-post="/{% if qp %}?qp={{qp.id}}{% endif %}"
+        hx-target="#chat-box"
+        hx-swap="beforeend"
+        hx-on::after-request="this.reset()"
+        
+        >
+
+        {% csrf_token %}
+
+        <div class="d-flex align-items-center gap-2">
+            <textarea id="userinput" name="userinput" placeholder="Type a message..." required></textarea>
+
+            <button class="btn btn-primary btn-icon btn-lg">
+                <em class="icon ni ni-send"></em>
+            </button>
+        </div>
+    </form>
+</div>
+
+{% endif %}
+{% endblock content %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/htmx.org@2.0.0"></script>
+
+<script>
+    // Echo user's message instantly
+    document.getElementById("chat-form")?.addEventListener("submit", function () {
+        const input = document.getElementById("userinput");
+        const chatBox = document.getElementById("chat-box");
+
+        if (!input.value.trim()) return;
+
+        const bubble = `
+            <div class="chat is-me">
+              <div class="chat-content w-100">
+                  <div class="chat-bubbles">
+                      <div class="chat-bubble">
+                          <div class="chat-msg">${input.value}</div>
+                          
+                      </div>
+                  </div>
+                  <ul class="chat-meta">
+                      <li>Now</li>
+                  </ul>
+              </div>
+          </div>
+        `;
+
+        chatBox.insertAdjacentHTML("beforeend", bubble);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    });
+
+    // Scroll after AI message
+    document.body.addEventListener("htmx:afterSwap", function (event) {
+        if (event.target.id === "chat-box") {
+            const cb = document.getElementById("chat-box");
+            cb.scrollTop = cb.scrollHeight;
+        }
+    });
+
+    // CSRF for HTMX
+    document.body.addEventListener('htmx:configRequest', (e) => {
+        e.detail.headers['X-CSRFToken'] =
+            document.querySelector('[name="csrfmiddlewaretoken"]').value;
+    });
+</script>
+{% endblock extra_js %}

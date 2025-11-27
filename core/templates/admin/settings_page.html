@@ -1,0 +1,65 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrahead %}
+<style>
+    .settings-wrapper {
+        background: #fff;
+        padding: 25px 30px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        max-width: 700px;
+    }
+
+    .settings-wrapper h1 {
+        margin-top: 0;
+        margin-bottom: 20px;
+        font-size: 24px;
+        font-weight: 600;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 10px;
+    }
+
+    .settings-form p {
+        margin-bottom: 15px;
+    }
+
+    .settings-form textarea {
+        width: 100% !important;
+        min-height: 120px;
+    }
+
+    .settings-submit {
+        margin-top: 20px;
+    }
+
+    .btn-save {
+        background: #2a7ae2;
+        color: white;
+        padding: 10px 18px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    .btn-save:hover {
+        background: #1d5cb8;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="settings-wrapper">
+    <h1>System Settings</h1>
+
+    <form method="post" class="settings-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <div class="settings-submit">
+            <button type="submit" class="btn-save">Save Settings</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

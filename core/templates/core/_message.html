@@ -1,0 +1,24 @@
+{% if message.role == 'assistant' %}
+<div class="chat is-you d-flex flex-column align-items-start">
+    <div class="chat-content w-100">
+        {{ message.content|safe }}
+        <ul class="chat-meta">
+            <li>{{ message.timestamp }}</li>
+        </ul>
+    </div>
+</div><!-- .chat -->
+{% else %}
+<div class="chat is-me">
+    <div class="chat-content w-100">
+        <div class="chat-bubbles">
+            <div class="chat-bubble">
+                <div class="chat-msg">{{ message.content|safe }}</div>
+                
+            </div>
+        </div>
+        <ul class="chat-meta">
+            <li>{{ message.timestamp }}</li>
+        </ul>
+    </div>
+</div>
+{% endif %}
