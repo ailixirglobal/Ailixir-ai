@@ -152,6 +152,25 @@
     </form>
 </div>
 
+<div class="modal fade" id="saveModal" tabindex="-1" aria-labelledby="saveModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="saveModalLabel">Save Response</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        This is where your modal content goes...
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endif %}
 {% endblock content %}
 
@@ -199,5 +218,26 @@
         e.detail.headers['X-CSRFToken'] =
             document.querySelector('[name="csrfmiddlewaretoken"]').value;
     });
+    
+    function copyResponse(c) {
+    // Go up to grandparent of clicked element
+    let p = c.parentElement.parentElement;
+
+    // Select the element that holds the response text
+    let container = p.querySelector('.response');
+
+    // Extract plain text (better than raw HTML for copying)
+    let text = container.innerHTML || container.textContent;
+
+    // Copy to clipboard
+    navigator.clipboard.writeText(text)
+    .then(() => {
+        alert("Copied to clipboard ✔");
+    })
+    .catch(err => {
+        alert("Failed to copy ❌");
+        console.error(err);
+    });
+}
 </script>
 {% endblock extra_js %}
